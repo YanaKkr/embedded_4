@@ -1,9 +1,14 @@
-void setCpuFreq(uint32_t mhz) {
+#include <Arduino.h>
+
+// Change CPU Frequency: 240, 160, 80, 40
+void setFrequency(uint32_t mhz) {
     setCpuFrequencyMhz(mhz);
-    Serial.printf("\n--- Поточна частота CPU: %d MHz ---\n", getCpuFrequencyMhz());
+    Serial.print("\n--- Frequency set to: ");
+    Serial.print(getCpuFrequencyMhz());
+    Serial.println(" MHz ---");
 }
 
-// QuickSort Template
+// QuickSort Implementation
 template <typename T>
 void quickSort(T arr[], int left, int right) {
     int i = left, j = right;
@@ -12,7 +17,9 @@ void quickSort(T arr[], int left, int right) {
         while (arr[i] < pivot) i++;
         while (arr[j] > pivot) j--;
         if (i <= j) {
-            std::swap(arr[i], arr[j]);
+            T temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
             i++; j--;
         }
     }
@@ -20,61 +27,52 @@ void quickSort(T arr[], int left, int right) {
     if (i < right) quickSort(arr, i, right);
 }
 
-template <typename T>
+// Binary Tree Logic
 struct Node {
-    T data;
+    int data;
     Node *left, *right;
-    Node(T val) : data(val), left(NULL), right(NULL) {}
+    Node(int val) : data(val), left(NULL), right(NULL) {}
 };
 
-template <typename T>
-Node<T>* insert(Node<T>* root, T val) {
-    if (!root) return new Node<T>(val);
+Node* insert(Node* root, int val) {
+    if (!root) return new Node(val);
     if (val < root->data) root->left = insert(root->left, val);
     else root->right = insert(root->right, val);
     return root;
 }
 
-template <typename T>
-void deleteTree(Node<T>* root) {
+void deleteTree(Node* root) {
     if (root) {
         deleteTree(root->left);
         deleteTree(root->right);
-        delete(root);
+        delete root;
     }
-}
-
-void runExperiment(int size) {
-    int* intArr = new int[size];
-    for(int i=0; i<size; i++) intArr[i] = random(0, 10000);
-
-    uint32_t start = micros();
-    quickSort(intArr, 0, size - 1);
-    uint32_t end = micros();
-    
-    Serial.printf("QuickSort (int, size %d): %u us\n", size, end - start);
-    
-    Node<int>* root = NULL;
-    start = micros();
-    for(int i=0; i<size; i++) root = insert(root, intArr[i]);
-    end = micros();
-    
-    Serial.printf("Binary Tree build (int, size %d): %u us\n", size, end - start);
-    
-    deleteTree(root);
-    delete[] intArr;
 }
 
 void setup() {
     Serial.begin(115200);
-    uint32_t freqs[] = {240, 160, 80, 40};
     int sizes[] = {50, 100, 500, 1000};
+    
+    setFrequency(240); // Repeat for 160, 80, 40
 
-    for (uint32_t f : freqs) {
-        setCpuFreq(f);
-        for (int s : sizes) {
-            runExperiment(s);
-        }
+    for (int size : sizes) {
+        int* arr = new int[size];
+        for(int i=0; i<size; i++) arr[i] = random(0, 5000);
+
+        uint32_t start = micros();
+        quickSort(arr, 0, size - 1);
+        uint32_t end = micros();
+
+        Serial.printf("Size %d | QuickSort Time: %u us\n", size, end - start);
+        
+        Node* root = NULL;
+        start = micros();
+        for(int i=0; i<size; i++) root = insert(root, arr[i]);
+        end = micros();
+        Serial.printf("Size %d | Tree Build Time: %u us\n", size, end - start);
+
+        deleteTree(root);
+        delete[] arr;
     }
 }
 

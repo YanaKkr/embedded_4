@@ -1,6 +1,3 @@
-#include <Arduino.h>
-
-// Функція для зміни частоти CPU (для ESP32)
 void setCpuFreq(uint32_t mhz) {
     setCpuFrequencyMhz(mhz);
     Serial.printf("\n--- Поточна частота CPU: %d MHz ---\n", getCpuFrequencyMhz());
@@ -23,7 +20,6 @@ void quickSort(T arr[], int left, int right) {
     if (i < right) quickSort(arr, i, right);
 }
 
-// Структура вузла бінарного дерева
 template <typename T>
 struct Node {
     T data;
@@ -31,7 +27,6 @@ struct Node {
     Node(T val) : data(val), left(NULL), right(NULL) {}
 };
 
-// Вставка в дерево
 template <typename T>
 Node<T>* insert(Node<T>* root, T val) {
     if (!root) return new Node<T>(val);
@@ -40,7 +35,6 @@ Node<T>* insert(Node<T>* root, T val) {
     return root;
 }
 
-// Очищення дерева (пам'ять)
 template <typename T>
 void deleteTree(Node<T>* root) {
     if (root) {

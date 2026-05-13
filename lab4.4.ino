@@ -1,9 +1,3 @@
-#include <Wire.h>
-#include <Adafruit_BMP280.h>
-#include <SPIFFS.h>
-#include <OneWire.h>
-#include <DallasTemperature.h>
-
 #define LDR_PIN 34
 #define ONE_WIRE_BUS 4
 
@@ -19,8 +13,7 @@ void setup() {
         Serial.println("SPIFFS Mount Failed");
         return;
     }
-
-    // Ініціалізація сенсорів
+    
     if (!bmp.begin(0x76)) { 
         Serial.println("BMP280 error");
     }
@@ -67,6 +60,5 @@ void loop() {
         lastLog = millis();
     }
     
-    // Для тесту: якщо прийде 'r' в консоль - прочитати файл
     if(Serial.available() && Serial.read() == 'r') readFile();
 }

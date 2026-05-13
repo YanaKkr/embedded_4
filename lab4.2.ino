@@ -1,22 +1,15 @@
-#include <OneWire.h>
-#include <DallasTemperature.h>
-
 #define ONE_WIRE_BUS 4 // Пін для DS18B20
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
 float rawData[100];
 
-// Медіанний фільтр (вікно 5)
 float medianFilter(float* data, int size) {
     float window[5];
-    // Спрощений приклад для однієї точки (зазвичай іде ковзним вікном)
-    // Для завдання відфільтруємо весь масив, виводячи медіану
     std::sort(data, data + size);
     return data[size / 2];
 }
 
-// Проста реалізація Кальмана
 struct KalmanFilter {
     float q = 0.1; // Процесний шум
     float r = 0.1; // Шум вимірювання

@@ -1,41 +1,40 @@
-#define ONE_WIRE_BUS 4 // Пін для DS18B20
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+#define ONE_WIRE_BUS 4
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
-float rawData[100];
+float readings[100];
 
-float medianFilter(float* data, int size) {
-    float window[5];
-    std::sort(data, data + size);
-    return data[size / 2];
+float getMedian(float* data, int n) {
+    // Small sort for the window
+    for (int i = 0; i < n-1; i++) {
+        for (int j = i+1; j < n; j++) {
+            if (data[i] > data[j]) {
+                float temp = data[i];
+                data[i] = data[j];
+                data[j] = temp;
+            }
+        }
+    }
+    return data[n/2];
 }
 
-struct KalmanFilter {
-    float q = 0.1; // Процесний шум
-    float r = 0.1; // Шум вимірювання
-    float x = 20;  // Початкове значення
-    float p = 1.0; // Помилка оцінки
-    float k;       // Коефіцієнт Кальмана
-
-    float update(float measurement) {
-        p = p + q;
-        k = p / (p + r);
-        x = x + k * (measurement - x);
-        p = (1 - k) * p;
-        return x;
-    }
-};
-
-void processSensors() {
+void setup() {
+    Serial.begin(115200);
     sensors.begin();
-    KalmanFilter kf;
     
-    Serial.println("Збір даних...");
+    Serial.println("Collecting 100 samples...");
     for(int i=0; i<100; i++) {
         sensors.requestTemperatures();
-        rawData[i] = sensors.getTempCByIndex(0);
-        float filteredK = kf.update(rawData[i]);
-        Serial.printf("Raw: %.2f, Kalman: %.2f\n", rawData[i], filteredK);
-        delay(1000);
+        readings[i] = sensors.getTempCByIndex(0);
+        delay(1000); // 1-2 second interval
+        Serial.print(".");
     }
+    
+    float medianValue = getMedian(readings, 100);
+    Serial.printf("\nFiltered Median Temperature: %.2f C\n", medianValue);
 }
+
+void loop() {}

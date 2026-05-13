@@ -1,0 +1,38 @@
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+#define ONE_WIRE_BUS 4
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
+
+struct Kalman {
+    float q = 0.125; // Process noise
+    float r = 4;     // Measurement noise
+    float x = 25;    // Initial value
+    float p = 1;     // Estimation error
+    float k;         // Kalman gain
+
+    float update(float measurement) {
+        p = p + q;
+        k = p / (p + r);
+        x = x + k * (measurement - x);
+        p = (1 - k) * p;
+        return x;
+    }
+} kf;
+
+void setup() {
+    Serial.begin(115200);
+    sensors.begin();
+
+    for(int i=0; i<100; i++) {
+        sensors.requestTemperatures();
+        float raw = sensors.getTempCByIndex(0);
+        float filtered = kf.update(raw);
+        
+        Serial.printf("Raw: %.2f | Kalman: %.2f\n", raw, filtered);
+        delay(1000);
+    }
+}
+
+void loop() {}
